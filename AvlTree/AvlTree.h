@@ -9,18 +9,38 @@
 template <typename T>
 class AvlNode
 {
-public:
-	AvlNode(const T& e) :elem(e),height(0) {}
+	template <typename T> friend class AvlTree;
+	AvlNode(const T& e) :elem(e),height(0),deletion(false) {}
 	T elem;
 	std::shared_ptr<AvlNode> left;
 	std::shared_ptr<AvlNode> right;
 	int	height;
+	bool deletion;
+public:
+	const T& element() const;
 };
+
+template <typename T>
+const T& AvlNode<T>::element() const
+{
+	return elem;
+}
+
 
 template <typename T>
 class AvlTree
 {
 public:
+	AvlTree() {}
+	template <typename Iter>
+	AvlTree(Iter beg, Iter end)
+	{
+		while (beg != end)
+		{
+			insertElement(*beg);
+			++beg;
+		}
+	}
 	void insertElement(const T& X)
 	{
 		insert(X, root);
@@ -29,6 +49,49 @@ public:
 	{
 		preorder(root, v);
 	}
+
+	std::shared_ptr<T> 
+		minElement() const
+	{
+		std::shared_ptr<AvlNode<T>> temp = root;
+		std::shared_ptr<AvlNode<T>> min;
+		std::shared_ptr<T> ret;
+		if (temp == nullptr)
+			return ret;
+		while (temp)
+		{
+			if (!temp->deletion)
+				min = temp;
+			temp = temp->left;
+		}
+		if (min)
+			ret = std::make_shared<T>(min->elem);
+		return ret;
+	}
+
+	std::shared_ptr<T>
+		maxElement() const
+	{
+		std::shared_ptr<AvlNode<T>> temp = root;
+		std::shared_ptr<AvlNode<T>> max;
+		std::shared_ptr<T> ret;
+		if (temp == nullptr)
+			return ret;
+		while (temp)
+		{
+			if (!temp->deletion)
+				max = temp;
+			temp = temp->right;
+		}
+		if (max)
+			ret = std::make_shared<T>(max->elem);
+		return ret;
+	}
+
+	std::shared_ptr<AvlNode<T>>
+		find(const T& x);
+	
+	void deletion(std::shared_ptr<AvlNode<T>> ptr);
 
 private:
 	void preorder(std::shared_ptr<AvlNode<T>> rt, std::vector<int>& v)
@@ -105,13 +168,43 @@ private:
 					doubleRotateWithRight(t);
 			}
 		}
+		else if (t->deletion)
+		{
+			t->deletion = false;
+		}
 		t->height = std::max(height(t->left), height(t->right)) + 1;
 	}
 	std::shared_ptr<AvlNode<T>> root;
 };
 
+template <typename T>
+std::shared_ptr<AvlNode<T>> AvlTree<T>::find(const T& x)
+{
+	std::shared_ptr<AvlNode<T>> Root = root;
+	std::shared_ptr<AvlNode<T>> ret;
+	while (Root)
+	{
+		if (x < Root->elem)
+			Root = Root->left;
+		else if (Root->elem < x)
+			Root = Root->right;
+		else if (Root->deletion)
+		{
+			break;
+		}
+		else
+		{
+			ret = Root;
+			break;
+		}
+	}
+	return ret;
+}
 
-
-
-
+//lazy deletion, suitable for a few deleted operations.
+template <typename T>
+void AvlTree<T>::deletion(std::shared_ptr<AvlNode<T>> ptr)
+{
+	ptr->deletion = true;
+}
 #endif
