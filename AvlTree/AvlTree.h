@@ -93,7 +93,56 @@ public:
 	
 	void deletion(std::shared_ptr<AvlNode<T>> ptr);
 
+	void getBetween(int k1, int k2, std::vector<T>& ret)
+	{
+		_getBetween(root, k1, k2, ret);
+	}
+
+	//return the numbers of nodes in the tree
+	int NodeCount()
+	{
+		return _NodeCount(root);
+	}
+	//return the numbers of leaves in the tree
+	int LeafCount()
+	{
+		return _LeafCount(root);
+	}
+	//return the numbers of full nodes in the tree
+	int FullNodeCount()
+	{
+		return _FullNodeCount(root);
+	}
 private:
+	int _NodeCount(std::shared_ptr<AvlNode<T>> rt)
+	{
+		if (rt == nullptr)
+			return 0;
+		else if (!rt->deletion)
+			return 1 + _NodeCount(rt->left) + _NodeCount(rt->right);
+		else
+			return _NodeCount(rt->left) + _NodeCount(rt->right);
+	}
+	int _LeafCount(std::shared_ptr<AvlNode<T>> rt)
+	{
+		if (!rt)
+			return 0;
+		else if (!rt->left && !rt->right && !rt->deletion)
+			return 1;
+		else
+			return _LeafCount(rt->left) + _LeafCount(rt->right);
+	}
+	int _FullNodeCount(std::shared_ptr<AvlNode<T>> rt)
+	{
+		if (!rt)
+			return 0;
+		else if (rt->left && rt->right && !rt->deletion)
+			return 1 + _FullNodeCount(rt->left) + _FullNodeCount(rt->right);
+		else
+			return _FullNodeCount(rt->left) + _FullNodeCount(rt->right);
+	}
+	void _getBetween(std::shared_ptr<AvlNode<T>> rt, 
+		int k1, int k2, std::vector<T>& ret);
 	void preorder(std::shared_ptr<AvlNode<T>> rt, std::vector<int>& v)
 	{
 		if (rt)
@@ -206,5 +255,25 @@ template <typename T>
 void AvlTree<T>::deletion(std::shared_ptr<AvlNode<T>> ptr)
 {
 	ptr->deletion = true;
+}
+
+//Get elements which satisfy k1 <= Key(X) <= k2
+template <typename T>
+void AvlTree<T>::_getBetween(std::shared_ptr<AvlNode<T>> rt,
+	int k1, int k2, std::vector<T>& ret)
+{
+	if (!rt)
+		return;
+	else if (rt->elem < k1)
+		_getBetween(rt->right, k1, k2, ret);
+	else if (k2 < rt->elem)
+		_getBetween(rt->left, k1, k2, ret);
+	else
+	{
+		_getBetween(rt->left, k1, k2, ret);
+		if (!rt->deletion)
+			ret.push_back(rt->elem);
+		_getBetween(rt->right, k1, k2, ret);
+	}
 }
 #endif
