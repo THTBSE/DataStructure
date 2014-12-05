@@ -2,9 +2,7 @@
 #include <queue>
 #include <unordered_set>
 #include <algorithm>
-#include "../Mathematics/GteIntrSegment3Triangle3.h"
-#include "../Mathematics/GteConstants.h"
-#include "../Mathematics/GteIntrSegment3AlignedBox3.h"
+
 
 typedef gte::Vector3<double> GVec3;
 typedef gte::Segment3<double> GSeg3;
@@ -125,7 +123,7 @@ int stopDepth)
 }
 
 TOctree::Result
-TOctree::IntrQuery(const gte::Segment3<double>& seg)
+TOctree::IntrQuery(const gte::Segment3<double>& seg) const
 {
 	Result ret;
 	gte::TIQuery<double, gte::Segment3<double>, gte::AlignedBox3<double>> tiq;
@@ -190,4 +188,41 @@ TOctree::IntrQuery(const gte::Segment3<double>& seg)
 		ret.intersect = true;
 
 	return ret;
+}
+
+gte::AlignedBox3<double>
+GenerateAABB(const std::vector<gte::Triangle3<double>>& TriList)
+{
+	if (TriList.empty())
+		return gte::AlignedBox3<double>();
+
+	double minX = TriList[0].v[0][0], maxX = minX;
+	double minY = TriList[0].v[0][1], maxY = minY;
+	double minZ = TriList[0].v[0][2], maxZ = minZ;
+
+	for (const auto& tri : TriList)
+	{
+		for (size_t i = 0; i < 3; i++)
+		{
+			if (tri.v[i][0] < minX)
+				minX = tri.v[i][0];
+			else if (tri.v[i][0] > maxX)
+				maxX = tri.v[i][0];
+
+			if (tri.v[i][1] < minY)
+				minY = tri.v[i][1];
+			else if (tri.v[i][1] > maxY)
+				maxY = tri.v[i][1];
+
+			if (tri.v[i][2] < minZ)
+				minZ = tri.v[i][2];
+			else if (tri.v[i][2] > maxZ)
+				maxZ = tri.v[i][2];
+		}
+	}
+
+	double min = std::min(minX, std::min(minY, minZ));
+	double max = std::max(maxX, std::max(maxY, maxZ));
+
+	return gte::AlignedBox3<double>(min, min, min, max, max, max);
 }

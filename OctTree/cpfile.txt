@@ -1,0 +1,15 @@
+E:/MyProj/PureFramework/Mathematics/GteLine3.h 
+E:/MyProj/PureFramework/Mathematics/Gteline3.inl 
+E:/MyProj/PureFramework/Mathematics/GteAlignedBox3.inl 
+E:/MyProj/PureFramework/Mathematics/GteFIQuery.inl 
+E:/MyProj/PureFramework/Mathematics/GteGeometricPrimitive.inl 
+E:/MyProj/PureFramework/Mathematics/GteIntrIntervals.inl 
+E:/MyProj/PureFramework/Mathematics/GteIntrLine3AlignedBox3.inl 
+E:/MyProj/PureFramework/Mathematics/GteIntrSegment3AlignedBox3.inl 
+E:/MyProj/PureFramework/Mathematics/GteIntrSegment3Triangle3.inl 
+E:/MyProj/PureFramework/Mathematics/GTEngineDEF.inl 
+E:/MyProj/PureFramework/Mathematics/GteSegment3.inl 
+E:/MyProj/PureFramework/Mathematics/GteTIQuery.inl 
+E:/MyProj/PureFramework/Mathematics/GteTriangle3.inl 
+E:/MyProj/PureFramework/Mathematics/GteVector.inl 
+E:/MyProj/PureFramework/Mathematics/GteVector3.inl 

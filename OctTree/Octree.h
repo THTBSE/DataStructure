@@ -2,9 +2,12 @@
 #define _FCL_OCTREE_H_
 #include <vector>
 #include <memory>
-#include "../Mathematics/GteAlignedBox3.h"
-#include "../Mathematics/GteTriangle3.h"
-#include "../Mathematics/GteSegment3.h"
+#include "lib/GteAlignedBox3.h"
+#include "lib/GteTriangle3.h"
+#include "lib/GteSegment3.h"
+#include "lib/GteIntrSegment3Triangle3.h"
+#include "lib/GteConstants.h"
+#include "lib/GteIntrSegment3AlignedBox3.h"
 
 //pointer of a triangle
 typedef std::shared_ptr<gte::Triangle3<double>> TriPtr;
@@ -30,7 +33,7 @@ public:
 		gte::Vector3<double> point;
 	};
 
-	Result IntrQuery(const gte::Segment3<double>& seg);
+	Result IntrQuery(const gte::Segment3<double>& seg) const;
 private:
 	std::shared_ptr < TOctreeNode >
 		BuildOctreeFromMesh(std::vector<TriPtr>& objects, const gte::AlignedBox3<double>& aabb,
