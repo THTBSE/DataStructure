@@ -63,7 +63,7 @@ int main()
 	//Triangle List to store mesh facets
 	std::vector<gte::Triangle3<double>> TriList;
 
-	char *filename = "dragon.stl";
+	char *filename = "dinosaur.stl";
 	read_stl_file(filename, TriList);
 
 	//generate bounding box of triangle mesh
@@ -73,7 +73,7 @@ int main()
 	TOctree octree(TriList, aabb, 8);
 
 	//segment which need to query 
-	gte::Segment3<double> seg(gte::Vector3<double>(-3.3, 2.3, 0.5), gte::Vector3<double>(100.0, 100.0, 100.0));
+	gte::Segment3<double> seg(gte::Vector3<double>(0.3, 1.3, 0.1), gte::Vector3<double>(3.0, 50.0, 30.0));
 
 	std::vector<gte::Segment3<double>> segs;
 	for (size_t i = 0; i < 100; ++i)

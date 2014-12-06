@@ -1,12 +1,14 @@
 #include "Octree.h"
 #include <queue>
 #include <unordered_set>
+#include <map>
 #include <algorithm>
 
 
 typedef gte::Vector3<double> GVec3;
 typedef gte::Segment3<double> GSeg3;
 typedef std::shared_ptr<TOctreeNode> TreeNodePtr;
+static gte::Segment3<double> IntrSeg;
 
 //Getting Cube by it's center and extent
 static inline void GetCubeFromCenter(gte::Vector3<double>& center, double extent, gte::AlignedBox3<double>& cube)
@@ -136,56 +138,9 @@ TOctree::IntrQuery(const gte::Segment3<double>& seg) const
 		return ret;
 	}
 
-	//find all leaves intersecting with segment 
-	std::queue<TreeNodePtr> internalNode;
-	internalNode.push(root);
-	std::unordered_set<TriPtr> LeavesHasTri;
-	
-
-	while (!internalNode.empty())
-	{
-		auto node = internalNode.front();
-		internalNode.pop();
-
-		//if we arrive the leaf
-		if (!node->objects.empty())
-		{
-			for (auto obj : node->objects)
-				LeavesHasTri.insert(obj);
-			continue;
-		}
-
-		for (size_t i = 0; i < 8; ++i)
-		{
-			if (node->children[i] != nullptr)
-			{
-				TIRet = tiq(seg, node->children[i]->aabb);
-				if (TIRet.intersect)
-				{
-					internalNode.push(node->children[i]);
-				}
-			}
-		}
-	}
-
-	gte::FIQuery<double, gte::Segment3<double>, gte::Triangle3<double>> fiq;
-	double minDist = std::numeric_limits<double>::max();
-	for (auto tri : LeavesHasTri)
-	{
-		auto FIRet = fiq(seg, *tri);
-		if (FIRet.intersect)
-		{
-			double dist = gte::Length(FIRet.point - seg.p[0]);
-			if (dist < minDist)
-			{
-				minDist = dist;
-				ret.point = FIRet.point;
-			}
-		}
-	}
-
-	if (minDist != std::numeric_limits<double>::max())
-		ret.intersect = true;
+	IntrSeg = seg;
+	//compute the nearest intersection recursively
+	IntrNode(root, ret);
 
 	return ret;
 }
@@ -225,4 +180,62 @@ GenerateAABB(const std::vector<gte::Triangle3<double>>& TriList)
 	double max = std::max(maxX, std::max(maxY, maxZ));
 
 	return gte::AlignedBox3<double>(min, min, min, max, max, max);
+}
+
+void TOctree::IntrNode(std::shared_ptr<TOctreeNode> aabb, Result& result) const
+{
+	//if the intersection is found , do nothing
+	if (result.intersect)
+		return;
+	
+	//arrive the leaf 
+	if (!aabb->objects.empty())
+	{
+		gte::FIQuery<double, gte::Segment3<double>, gte::Triangle3<double>> fiqTri;
+		double minDist = std::numeric_limits<double>::max();
+		GVec3 tempPoint;
+		for (auto tri : aabb->objects)
+		{
+			auto triRet = fiqTri(IntrSeg, *tri);
+			if (triRet.intersect)
+			{
+				double dist = gte::Length(triRet.point - IntrSeg.p[0]);
+				if (dist < minDist)
+				{
+					minDist = dist;
+					tempPoint = triRet.point;
+				}
+			}
+		}
+		if (minDist < std::numeric_limits<double>::max())
+		{
+			result.intersect = true;
+			result.point = tempPoint;
+		}
+		return;
+	}
+
+	//if we don't arrive the leaf, going deep to find the intersection.
+	//a segment may has two intersection with a box,we only use the nearest
+	//one is enough for the algorithm.
+	gte::FIQuery<double, gte::Segment3<double>, gte::AlignedBox3<double>> fiq;
+	std::multimap<double, std::shared_ptr<TOctreeNode>> intrNode;
+	for (int i = 0; i < 8; ++i)
+	{
+		if (aabb->children[i] != nullptr)
+		{
+			auto ret = fiq(IntrSeg, aabb->children[i]->aabb);
+			if (ret.intersect)
+			{
+				double dist = gte::Length(ret.point[0] - IntrSeg.p[0]);
+				intrNode.insert(std::make_pair(dist, aabb->children[i]));
+			}
+		}
+	}
+
+	for (auto iter = intrNode.begin(); iter != intrNode.end(); ++iter)
+	{
+		IntrNode(iter->second, result);
+	}
+
 }

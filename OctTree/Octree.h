@@ -32,13 +32,14 @@ public:
 		bool intersect;
 		gte::Vector3<double> point;
 	};
-
 	Result IntrQuery(const gte::Segment3<double>& seg) const;
 private:
 	std::shared_ptr < TOctreeNode >
 		BuildOctreeFromMesh(std::vector<TriPtr>& objects, const gte::AlignedBox3<double>& aabb,
 		int stopDepth);
 	std::shared_ptr<TOctreeNode> root;
+
+	void IntrNode(std::shared_ptr<TOctreeNode> aabb, Result& result) const ;
 };
 
 
