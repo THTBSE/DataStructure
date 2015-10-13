@@ -9,7 +9,7 @@
 #include "lib/GteConstants.h"
 #include "lib/GteIntrSegment3AlignedBox3.h"
 
-//pointer of a triangle
+//pointer of a triangle .
 typedef std::shared_ptr<gte::Triangle3<double>> TriPtr;
 
 class TOctreeNode
